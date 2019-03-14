@@ -14,12 +14,13 @@ public class AuthServiceImpl implements Auth {
     @Override
     public UserData login(String username, String password, String getDataFromUser) throws IOException {
         UserData userData = new UserData();
+
         Instagram4j instagram = Instagram4j.builder().username(username).password(password).build();
         instagram.setup();
         instagram.login();
         String novi = getDataFromUser.replaceFirst("https://instagram.com/", "");
 
-        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(novi));
+        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(getDataFromUser));
         if (userResult != null && userResult.getUser() != null) {
             if (userResult.getUser().address_street != null) {
                 userData.setStreet(userResult.getUser().address_street);
@@ -32,6 +33,9 @@ public class AuthServiceImpl implements Auth {
             }
             if (userResult.getUser().public_email != null) {
                 userData.setEmail(userResult.getUser().public_email);
+            }
+            if (userResult.getUser().public_phone_number != null) {
+                userData.setPhoneNumber(userResult.getUser().public_phone_number);
             }
         }
         System.out.println(username);
