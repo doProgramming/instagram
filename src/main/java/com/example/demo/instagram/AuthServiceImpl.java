@@ -20,7 +20,7 @@ public class AuthServiceImpl implements Auth {
         instagram.login();
         String novi = getDataFromUser.replaceFirst("https://instagram.com/", "");
 
-        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(getDataFromUser));
+        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(novi));
         if (userResult != null && userResult.getUser() != null) {
             if (userResult.getUser().address_street != null) {
                 userData.setStreet(userResult.getUser().address_street);
