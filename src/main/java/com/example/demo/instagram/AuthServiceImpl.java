@@ -65,10 +65,11 @@ public class AuthServiceImpl implements Auth {
         if(authentication==null || authentication.getUsername()==null || authentication.getUsername()==null){
             new Exception();
         }
+        //Connect to instagram account host with proxy
         Instagram4j instagram = login(authentication.getUsername(), authentication.getPassword());
 
         //Removes prefix and allows to be used with username and as link
-        String usernameWithoutPrefix = authentication.getUsername().replaceFirst("https://instagram.com/", "");
+        String usernameWithoutPrefix = authentication.getInstagramUser().replaceFirst("https://instagram.com/", "");
 
         //Get data from user
         InstagramSearchUsernameResult userResult = getUserData(authentication.getUsername(), authentication.getPassword(), usernameWithoutPrefix);
