@@ -8,4 +8,5 @@ public class Authentication {
     String password;
     String instagramUser;
     String comment;
+    String mediaId;
 }

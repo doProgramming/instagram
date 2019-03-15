@@ -8,6 +8,7 @@ import org.brunocvcunha.instagram4j.Instagram4j;
 import org.brunocvcunha.instagram4j.requests.InstagramPostCommentRequest;
 import org.brunocvcunha.instagram4j.requests.InstagramSearchUsernameRequest;
 import org.brunocvcunha.instagram4j.requests.InstagramUserFeedRequest;
+import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedItem;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramPostCommentResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramSearchUsernameResult;
@@ -20,7 +21,7 @@ public class AuthServiceImpl implements Auth {
 
 
     @Override
-    public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom) throws IOException {
+    public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException {
 
         //Connect to instagram account host with proxy
         Instagram4j instagram = login(usernameLogin, password);
@@ -34,7 +35,7 @@ public class AuthServiceImpl implements Auth {
         //Setup of useragent
         String useragent = "Samsung Galaxy 9";
 
-        sendComment(instagram, userResult, comment);
+        sendComment(instagram, userResult, comment, mediaId);
         return mapFromInstagramToUserData(userResult);
     }
 
@@ -61,8 +62,8 @@ public class AuthServiceImpl implements Auth {
     }
 
     @Override
-    public String sendComment(Authentication authentication) throws IOException{
-        if(authentication==null || authentication.getUsername()==null || authentication.getUsername()==null){
+    public String sendComment(Authentication authentication) throws IOException {
+        if (authentication == null || authentication.getUsername() == null || authentication.getUsername() == null) {
             new Exception();
         }
         //Connect to instagram account host with proxy
@@ -77,7 +78,7 @@ public class AuthServiceImpl implements Auth {
         //Setup of useragent
         String useragent = "Samsung Galaxy 9";
 
-        sendComment(instagram, userResult, authentication.getComment());
+        sendComment(instagram, userResult, authentication.getComment(),authentication.getMediaId());
         return "Comment has been sent";
 
     }
@@ -163,10 +164,18 @@ public class AuthServiceImpl implements Auth {
      *
      * */
 
-    private InstagramPostCommentResult sendComment(Instagram4j instagram, InstagramSearchUsernameResult usernameResult, String comment) throws IOException {
+    private InstagramPostCommentResult sendComment(Instagram4j instagram, InstagramSearchUsernameResult usernameResult, String comment, String mediaId) throws IOException {
         usernameResult.getUser().getPk();
         InstagramFeedResult tagFeed = instagram.sendRequest(new InstagramUserFeedRequest(usernameResult.getUser().getPk()));
-        Long postId = tagFeed.getItems().get(0).getPk();
+        Long postId = null;
+        for (InstagramFeedItem item : tagFeed.getItems()) {
+            if (postId == null) {
+                if (item.getCode().equals(mediaId)) {
+                    postId = item.getPk();
+                }
+            }
+        }
+//                tagFeed.getItems().get(0).getPk();
 
         //Check is this getUser.getPk() I need id of user
         //InstagramFeedResult feedResult = instagram.sendRequest(new InstagramUserFeedRequest(postId));

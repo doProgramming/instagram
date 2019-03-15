@@ -13,8 +13,8 @@ public class AuthServiceEndpoint {
 
     @GetMapping(value = "/instagram/user/data")
     public UserData getDataFromInstagram(@RequestParam String username, @RequestParam String password
-            , @RequestParam String comment, @RequestParam String getDataFromUser) throws IOException {
-        return auth.getDataAndSendComment(username, comment, password, getDataFromUser);
+            , @RequestParam String comment, @RequestParam String getDataFromUser, @RequestParam String mediaId) throws IOException {
+        return auth.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId);
     }
 
     @GetMapping(value = "/instagram/user/data/withoutproxy")
@@ -29,8 +29,8 @@ public class AuthServiceEndpoint {
 
     @GetMapping(value = "/instagram/sendComment")
     public UserData sendComment(@RequestParam String username, @RequestParam String password
-            , @RequestParam String comment, @RequestParam String getDataFromUser) throws IOException {
-        return auth.getDataAndSendComment(username, comment, password, getDataFromUser);
+            , @RequestParam String comment, @RequestParam String getDataFromUser,@RequestParam String mediaId) throws IOException {
+        return auth.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId);
     }
 
 }
