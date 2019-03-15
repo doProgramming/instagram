@@ -22,7 +22,10 @@ public class AuthServiceImpl implements Auth {
 
         InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(novi));
         if (userResult != null && userResult.getUser() != null) {
-            if (userResult.getUser().address_street != null) {
+//            if (userResult.getUser().address_street != null) {
+//                userData.setText(userResult.getUser().);
+//            }
+            if (userResult.getUser().public_phone_country_code != null) {
                 userData.setCountry(userResult.getUser().public_phone_country_code);
             }
             if (userResult.getUser().city_name != null) {
