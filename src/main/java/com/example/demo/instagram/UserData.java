@@ -5,8 +5,7 @@ import lombok.Data;
 @Data
 public class UserData {
     String userName;
-    String city;
+    String country;
     String email;
-    String street;
     String phoneNumber;
 }
