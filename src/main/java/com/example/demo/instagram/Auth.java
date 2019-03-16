@@ -3,7 +3,8 @@ package com.example.demo.instagram;
 import java.io.IOException;
 
 public interface Auth {
-    UserData getDataAndSendComment(String username, String comment, String password, String getDataFromUser, String mediaId) throws IOException;
+    UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId, String coockiName, String coockiValue) throws IOException,ClassNotFoundException;
+    UserData getData(String usernameLogin, String comment, String password, String userFrom,String coockiName, String coockiValue) throws IOException,ClassNotFoundException;
     UserData oldlogin(String username,String password, String getDataFromUser) throws IOException;
-    String sendComment(Authentication authentication) throws IOException;
+    String sendComment(Authentication authentication,String coockiName, String coockiValue) throws IOException,ClassNotFoundException;
 }
