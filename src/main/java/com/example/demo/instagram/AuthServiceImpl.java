@@ -44,7 +44,7 @@ public class AuthServiceImpl implements Auth {
     }
 
     @Override
-    public UserData getData(String usernameLogin, String comment, String password, String userFrom,String coockiName, String coockiValue) throws IOException,ClassNotFoundException {
+    public UserData getData(String usernameLogin, String password, String userFrom) throws IOException,ClassNotFoundException {
 
 //        //Connect to instagram account host with proxy
 //        Instagram4j instagram = login(usernameLogin, password,coockiName, coockiValue);
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements Auth {
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
 
         //Get data from user
-        InstagramSearchUsernameResult userResult = getUserData(usernameLogin, password, usernameWithoutPrefix, coockiName, coockiValue);
+        InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
 //        //Setup of useragent
 //        String useragent = "Samsung Galaxy 9";
@@ -149,7 +149,14 @@ public class AuthServiceImpl implements Auth {
      * */
 
     private InstagramSearchUsernameResult getUserData(String usernameHost, String password, String usernameUser,String coockiName, String coockiValue) throws IOException,ClassNotFoundException {
-        Instagram4j instagram = loginProxyAndCoocie(usernameHost,password);
+        Instagram4j instagram = loginProxyAndCookie(usernameHost,password);
+//        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
+        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameUser));
+        return userResult;
+    }
+
+    private InstagramSearchUsernameResult justGetUserData(String usernameHost, String password, String usernameUser) throws IOException,ClassNotFoundException {
+        Instagram4j instagram = loginProxyAndCookie(usernameHost,password);
 //        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
         InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameUser));
         return userResult;
@@ -173,7 +180,7 @@ public class AuthServiceImpl implements Auth {
         return instagram;
     }
 
-    private Instagram4j loginProxyAndCoocie(String userName, String password) throws IOException,ClassNotFoundException {
+    private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException,ClassNotFoundException {
         Instagram4j instagram = Instagram4j.builder().username(userName).password(password).build();
         instagram.setup();
         instagram.login();

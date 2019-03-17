@@ -18,9 +18,9 @@ public class AuthServiceEndpoint {
     }
 
     @GetMapping(value = "/instagram/user/data/withoutproxy")
-    public UserData getData(@RequestHeader String coockiName,@RequestHeader String coockiValue, @RequestParam String username, @RequestParam String password
-            , @RequestParam String comment, @RequestParam String getDataFromUser) throws IOException,ClassNotFoundException {
-        return auth.getData(username, comment, password, getDataFromUser, coockiName, coockiValue);
+    public UserData getData(@RequestParam String username, @RequestParam String password
+            ,  @RequestParam String getDataFromUser) throws IOException,ClassNotFoundException {
+        return auth.getData(username, password, getDataFromUser);
     }
 
     @GetMapping(value = "/instagram/user/old/data/withoutproxy")
