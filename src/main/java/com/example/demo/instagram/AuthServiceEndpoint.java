@@ -17,7 +17,7 @@ public class AuthServiceEndpoint {
         return auth.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId, coockiName, coockiValue);
     }
 
-    @GetMapping(value = "/instagram/user/data/withoutproxy")
+    @GetMapping(value = "/instagram/getdata")
     public UserData getData(@RequestParam String username, @RequestParam String password
             ,  @RequestParam String getDataFromUser) throws IOException,ClassNotFoundException {
         return auth.getData(username, password, getDataFromUser);
