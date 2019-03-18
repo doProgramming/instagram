@@ -48,4 +48,9 @@ public class AuthServiceEndpoint {
        return store.setProxyValidnes();
     }
 
+    @GetMapping(value = "/config/server/proxy")
+    public String setUpConfig()throws IOException{
+        return store.setGetProxyValidnes();
+    }
+
 }

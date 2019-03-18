@@ -29,6 +29,14 @@ public class PersistentCookieStore implements CookieStore, Runnable, ProxyValid 
     }
 
     @Override
+    public String setGetProxyValidnes() throws IOException{
+        Writer fileWriter = new FileWriter("valid.txt");
+        fileWriter.write("not set valid");
+        fileWriter.close();
+        return "it is valid proxy";
+    }
+
+    @Override
     public Boolean getProxyValidnes() throws IOException{
         Reader fileReader = new FileReader("valid.txt");
 
