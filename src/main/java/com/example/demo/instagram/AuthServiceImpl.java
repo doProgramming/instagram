@@ -190,7 +190,6 @@ public class AuthServiceImpl implements Auth {
     private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException,ClassNotFoundException {
         Instagram4j instagram = Instagram4j.builder().username(userName).password(password).build();
         //
-        loginProxy(userName,password);
 
         PersistentCookieStore persistentCookieStore = new PersistentCookieStore();
         try {
