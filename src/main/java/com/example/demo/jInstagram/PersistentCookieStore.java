@@ -1,18 +1,46 @@
 package com.example.demo.jInstagram;
 
+import com.example.demo.instagram.ProxyValid;
+import org.springframework.stereotype.Service;
+
+import java.io.*;
 import java.net.CookieManager;
 import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.util.List;
 
-public class PersistentCookieStore implements CookieStore, Runnable {
+@Service
+public class PersistentCookieStore implements CookieStore, Runnable, ProxyValid {
     private CookieStore store;
 
     public PersistentCookieStore() {
         store = new CookieManager().getCookieStore();
         // deserialize cookies into store
         Runtime.getRuntime().addShutdownHook(new Thread(this));
+    }
+
+    @Override
+    public String setProxyValidnes() throws IOException{
+        Writer fileWriter = new FileWriter("valid.txt");
+        fileWriter.write("valid.");
+        fileWriter.close();
+        return "it is valid proxy";
+    }
+
+    @Override
+    public Boolean getProxyValidnes() throws IOException{
+        Reader fileReader = new FileReader("valid.txt");
+
+        int data = fileReader.read();
+        while(data != -1) {
+            if(data==118){
+                return true;
+            }else {
+                fileReader.close();
+                return false;
+            }}
+        return false;
     }
 
     @Override

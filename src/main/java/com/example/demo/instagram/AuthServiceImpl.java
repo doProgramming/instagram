@@ -1,5 +1,6 @@
 package com.example.demo.instagram;
 
+import com.example.demo.jInstagram.PersistentCookieStore;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -18,7 +19,6 @@ import org.brunocvcunha.instagram4j.requests.payload.InstagramSearchUsernameResu
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.Date;
 
 @Service
 public class AuthServiceImpl implements Auth {
@@ -123,7 +123,14 @@ public class AuthServiceImpl implements Auth {
         ((BasicClientCookie) coockie).setAttribute("coockies","nice");
         cookieStore.addCookie(coockie);
         Instagram4j instagram = Instagram4j.builder().username(username).password(password).cookieStore(cookieStore).userId(11648766879L).uuid("7b26602d-3722-49ee-bb6a-ba2d803ae64a").build();
-        cookieStore = instagram.getCookieStore();
+        PersistentCookieStore persistentCookieStore = new PersistentCookieStore();
+        try {
+            if(persistentCookieStore.getProxyValidnes()){
+                return new Instagram4j("","");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } cookieStore = instagram.getCookieStore();
         instagram.getProxy();
 //        instagram.getClient().getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 //        instagram.getClient().getParams().setIntParameter("http.connection.timeout", 600000);
@@ -162,7 +169,7 @@ public class AuthServiceImpl implements Auth {
         return userResult;
     }
 
-    private Instagram4j loginProxy(String userName, String password){
+    private  static Instagram4j loginProxy(String userName, String password){
         Instagram4j instagram = Instagram4j.builder().username(userName).password(password).build();
         instagram.setup();
         HttpHost proxy = new HttpHost("IP_SERVER", 8080, "http");
@@ -182,6 +189,18 @@ public class AuthServiceImpl implements Auth {
 
     private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException,ClassNotFoundException {
         Instagram4j instagram = Instagram4j.builder().username(userName).password(password).build();
+        //
+        loginProxy(userName,password);
+
+        PersistentCookieStore persistentCookieStore = new PersistentCookieStore();
+        try {
+            if(persistentCookieStore.getProxyValidnes()){
+                return new Instagram4j("","");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         instagram.setup();
         instagram.login();
         File cookieLogin = new File(userName + ".txt");
