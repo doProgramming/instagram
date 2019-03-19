@@ -17,6 +17,7 @@ public class PersistentCookieStore implements CookieStore, Runnable, ProxyValid 
     public PersistentCookieStore() {
         store = new CookieManager().getCookieStore();
         // deserialize cookies into store
+        //Added line
         Runtime.getRuntime().addShutdownHook(new Thread(this));
     }
 
