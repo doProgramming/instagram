@@ -17,7 +17,6 @@ public class PersistentCookieStore implements CookieStore, Runnable, ProxyValid 
     public PersistentCookieStore() {
         store = new CookieManager().getCookieStore();
         // deserialize cookies into store
-        //Added line
         Runtime.getRuntime().addShutdownHook(new Thread(this));
     }
 
@@ -34,7 +33,7 @@ public class PersistentCookieStore implements CookieStore, Runnable, ProxyValid 
         Writer fileWriter = new FileWriter("valid.txt");
         fileWriter.write("not set valid");
         fileWriter.close();
-        return "it is valid proxy";
+        return "proxy is not valid";
     }
 
     @Override
@@ -87,7 +86,5 @@ public class PersistentCookieStore implements CookieStore, Runnable, ProxyValid 
     public boolean removeAll() {
         return store.removeAll();
     }
-
-    // delegate all implementations to store object like above
 }
 

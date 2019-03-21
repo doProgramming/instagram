@@ -25,7 +25,7 @@ public class AuthServiceImpl implements Auth {
 
 
     @Override
-    public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId, String coockiName, String coockiValue) throws IOException,ClassNotFoundException {
+    public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException,ClassNotFoundException {
 
         //Connect to instagram account host with proxy
         //Instagram4j instagram = login(usernameLogin, password,coockiName, coockiValue);
@@ -34,11 +34,11 @@ public class AuthServiceImpl implements Auth {
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
 
         //Get data from user
-        InstagramSearchUsernameResult userResult = getUserData(usernameLogin, password, usernameWithoutPrefix, coockiName, coockiValue);
+        InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
         //Setup of useragent
         String useragent = "Samsung Galaxy 9";
-
+//TODO enalbe send comment and fix it
         //sendComment(instagram, userResult, comment, mediaId);
         return mapFromInstagramToUserData(userResult);
     }
@@ -46,19 +46,12 @@ public class AuthServiceImpl implements Auth {
     @Override
     public UserData getData(String usernameLogin, String password, String userFrom) throws IOException,ClassNotFoundException {
 
-//        //Connect to instagram account host with proxy
-//        Instagram4j instagram = login(usernameLogin, password,coockiName, coockiValue);
-
         //Removes prefix and allows to be used with username and as link
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
 
         //Get data from user
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
-//        //Setup of useragent
-//        String useragent = "Samsung Galaxy 9";
-
-        //sendComment(instagram, userResult, comment, mediaId);
         return mapFromInstagramToUserData(userResult);
     }
 
@@ -132,12 +125,6 @@ public class AuthServiceImpl implements Auth {
             e.printStackTrace();
         } cookieStore = instagram.getCookieStore();
         instagram.getProxy();
-//        instagram.getClient().getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-//        instagram.getClient().getParams().setIntParameter("http.connection.timeout", 600000);
-//
-//        instagram.getClient().getCredentialsProvider().setCredentials(
-//                new AuthScope("107.152.153.235", 9788),
-//                new UsernamePasswordCredentials("0e27Df", "Z0PfAd"));
         instagram.setup();
        try {
            instagram.login();
@@ -166,6 +153,25 @@ public class AuthServiceImpl implements Auth {
         Instagram4j instagram = loginProxyAndCookie(usernameHost,password);
 //        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
         InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameUser));
+        return userResult;
+    }
+
+    private InstagramSearchUsernameResult getUserDataSendComment(String usernameHost, String password, String usernameUser, String comment) throws IOException,ClassNotFoundException {
+        Instagram4j instagram = loginProxyAndCookie(usernameHost,password);
+//        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
+        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameUser));
+        InstagramFeedResult tagFeed = instagram.sendRequest(new InstagramUserFeedRequest(userResult.getUser().getPk()));
+        Long postId = null;
+        for (InstagramFeedItem item : tagFeed.getItems()) {
+            if (postId == null) {
+//                if (item.getCode().equals(mediaId)) {
+                if(true){
+                    postId = item.getPk();
+                }
+            }
+        }
+        InstagramPostCommentResult results = instagram.sendRequest(new InstagramPostCommentRequest(postId, comment));
+
         return userResult;
     }
 
@@ -202,6 +208,7 @@ public class AuthServiceImpl implements Auth {
 
         instagram.setup();
         instagram.login();
+        //rankToken got pupulated
         File cookieLogin = new File(userName + ".txt");
 
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cookieLogin));
@@ -251,6 +258,9 @@ public class AuthServiceImpl implements Auth {
             if (userResult.getUser().public_phone_number != null) {
                 userData.setPhoneNumber(userResult.getUser().public_phone_number);
             }
+        }else {
+            //When user is over abussed with too many requests
+            userData.setUserName("User failed");
         }
         return userData;
     }

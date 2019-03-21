@@ -1,6 +1,5 @@
 package com.example.demo.instagram;
 
-import com.example.demo.jInstagram.PersistentCookieStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,13 +11,10 @@ public class AuthServiceEndpoint {
     @Autowired
     Auth auth;
 
-    @Autowired
-    PersistentCookieStore store;
-
     @GetMapping(value = "/instagram/user/data/withproxy")
-    public UserData getDataFromInstagram(@RequestHeader String coockiName,@RequestHeader String coockiValue,  @RequestParam String username, @RequestParam String password
+    public UserData getDataFromInstagram(@RequestParam String username, @RequestParam String password
             , @RequestParam String comment, @RequestParam String getDataFromUser, @RequestParam String mediaId) throws IOException,ClassNotFoundException {
-        return auth.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId, coockiName, coockiValue);
+        return auth.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId);
     }
 
     @GetMapping(value = "/instagram/getdata")
@@ -28,7 +24,7 @@ public class AuthServiceEndpoint {
     }
 
     @GetMapping(value = "/instagram/user/old/data/withoutproxy")
-    public UserData getDataFromInstagram(@RequestHeader String coockiName,@RequestHeader String coockiValue,@RequestParam String username, @RequestParam String password, @RequestParam String getDataFromUser) throws IOException {
+    public UserData getDataFromInstagram(@RequestParam String username, @RequestParam String password, @RequestParam String getDataFromUser) throws IOException {
         return auth.oldlogin(username, password, getDataFromUser);
     }
 
@@ -38,19 +34,9 @@ public class AuthServiceEndpoint {
     }
 
     @GetMapping(value = "/instagram/sendComment")
-    public UserData sendComment(@RequestHeader String coockiName,@RequestHeader String coockiValue,@RequestParam String username, @RequestParam String password
+    public UserData sendComment(@RequestParam String username, @RequestParam String password
             , @RequestParam String comment, @RequestParam String getDataFromUser,@RequestParam String mediaId) throws IOException,ClassNotFoundException {
-        return auth.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId, coockiName, coockiValue);
-    }
-
-    @GetMapping(value = "/config/server")
-    public String setUp()throws IOException{
-       return store.setProxyValidnes();
-    }
-
-    @GetMapping(value = "/config/server/proxy")
-    public String setUpConfig()throws IOException{
-        return store.setGetProxyValidnes();
+        return auth.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId);
     }
 
 }
