@@ -46,11 +46,14 @@ public class AuthServiceImpl implements Auth {
     @Override
     public UserData getData(String usernameLogin, String password, String userFrom) throws IOException,ClassNotFoundException {
 
+        String validation;
+
         //Removes prefix and allows to be used with username and as link
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
 
         //Get data from user
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
+
 
         return mapFromInstagramToUserData(userResult);
     }
@@ -260,7 +263,7 @@ public class AuthServiceImpl implements Auth {
             }
         }else {
             //When user is over abussed with too many requests
-            userData.setUserName("User failed");
+            userData.setUserName("Unavailable");
         }
         return userData;
     }
