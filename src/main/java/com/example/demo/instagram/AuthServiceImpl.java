@@ -23,9 +23,12 @@ import java.io.*;
 @Service
 public class AuthServiceImpl implements Auth {
 
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String LOGIN_REQUIRED = "login_required";
+
 
     @Override
-    public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException,ClassNotFoundException {
+    public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException, ClassNotFoundException {
 
         //Connect to instagram account host with proxy
         //Instagram4j instagram = login(usernameLogin, password,coockiName, coockiValue);
@@ -38,15 +41,13 @@ public class AuthServiceImpl implements Auth {
 
         //Setup of useragent
         String useragent = "Samsung Galaxy 9";
-//TODO enalbe send comment and fix it
+        //TODO enalbe send comment and fix it
         //sendComment(instagram, userResult, comment, mediaId);
         return mapFromInstagramToUserData(userResult);
     }
 
     @Override
-    public UserData getData(String usernameLogin, String password, String userFrom) throws IOException,ClassNotFoundException {
-
-        String validation;
+    public UserData getData(String usernameLogin, String password, String userFrom) throws IOException, ClassNotFoundException {
 
         //Removes prefix and allows to be used with username and as link
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
@@ -54,8 +55,9 @@ public class AuthServiceImpl implements Auth {
         //Get data from user
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
-
-        return mapFromInstagramToUserData(userResult);
+        //Map and validate user
+        UserData userDataResponse = mapFromInstagramToUserData(userResult);
+        return userDataResponse;
     }
 
     /*
@@ -86,7 +88,7 @@ public class AuthServiceImpl implements Auth {
             new Exception();
         }
         //Connect to instagram account host with proxy
-        Instagram4j instagram = login(authentication.getUsername(), authentication.getPassword(),coockiName, coockiValue);
+        Instagram4j instagram = login(authentication.getUsername(), authentication.getPassword(), coockiName, coockiValue);
 
         //Removes prefix and allows to be used with username and as link
         String usernameWithoutPrefix = authentication.getInstagramUser().replaceFirst("https://instagram.com/", "");
@@ -97,7 +99,7 @@ public class AuthServiceImpl implements Auth {
         //Setup of useragent
         String useragent = "Samsung Galaxy 9";
 
-        sendComment(instagram, userResult, authentication.getComment(),authentication.getMediaId());
+        sendComment(instagram, userResult, authentication.getComment(), authentication.getMediaId());
         return "Comment has been sent";
 
     }
@@ -114,26 +116,27 @@ public class AuthServiceImpl implements Auth {
         HttpHost proxy = new HttpHost("181.177.251.7", 80, "http");
 //        Instagram4j instagram =  SIngleton.getInstance(username,password,coockiName,coockiValue);
         CookieStore cookieStore = null;
-        Cookie coockie = new BasicClientCookie("cookies","true");
+        Cookie coockie = new BasicClientCookie("cookies", "true");
         ((BasicClientCookie) coockie).setSecure(true);
-        ((BasicClientCookie) coockie).setAttribute("coockies","nice");
+        ((BasicClientCookie) coockie).setAttribute("coockies", "nice");
         cookieStore.addCookie(coockie);
         Instagram4j instagram = Instagram4j.builder().username(username).password(password).cookieStore(cookieStore).userId(11648766879L).uuid("7b26602d-3722-49ee-bb6a-ba2d803ae64a").build();
         PersistentCookieStore persistentCookieStore = new PersistentCookieStore();
         try {
-            if(persistentCookieStore.getProxyValidnes()){
-                return new Instagram4j("","");
+            if (persistentCookieStore.getProxyValidnes()) {
+                return new Instagram4j("", "");
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } cookieStore = instagram.getCookieStore();
+        }
+        cookieStore = instagram.getCookieStore();
         instagram.getProxy();
         instagram.setup();
-       try {
-           instagram.login();
-       } catch (Exception ex) {
-           ex.printStackTrace();
-       }
+        try {
+            instagram.login();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return instagram;
     }
 
@@ -145,22 +148,22 @@ public class AuthServiceImpl implements Auth {
      *
      * */
 
-    private InstagramSearchUsernameResult getUserData(String usernameHost, String password, String usernameUser,String coockiName, String coockiValue) throws IOException,ClassNotFoundException {
-        Instagram4j instagram = loginProxyAndCookie(usernameHost,password);
+    private InstagramSearchUsernameResult getUserData(String usernameHost, String password, String usernameUser, String coockiName, String coockiValue) throws IOException, ClassNotFoundException {
+        Instagram4j instagram = loginProxyAndCookie(usernameHost, password);
 //        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
         InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameUser));
         return userResult;
     }
 
-    private InstagramSearchUsernameResult justGetUserData(String usernameHost, String password, String usernameUser) throws IOException,ClassNotFoundException {
-        Instagram4j instagram = loginProxyAndCookie(usernameHost,password);
+    private InstagramSearchUsernameResult justGetUserData(String usernameHost, String password, String usernameUser) throws IOException, ClassNotFoundException {
+        Instagram4j instagram = loginProxyAndCookie(usernameHost, password);
 //        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
         InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameUser));
         return userResult;
     }
 
-    private InstagramSearchUsernameResult getUserDataSendComment(String usernameHost, String password, String usernameUser, String comment) throws IOException,ClassNotFoundException {
-        Instagram4j instagram = loginProxyAndCookie(usernameHost,password);
+    private InstagramSearchUsernameResult getUserDataSendComment(String usernameHost, String password, String usernameUser, String comment) throws IOException, ClassNotFoundException {
+        Instagram4j instagram = loginProxyAndCookie(usernameHost, password);
 //        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
         InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameUser));
         InstagramFeedResult tagFeed = instagram.sendRequest(new InstagramUserFeedRequest(userResult.getUser().getPk()));
@@ -168,7 +171,7 @@ public class AuthServiceImpl implements Auth {
         for (InstagramFeedItem item : tagFeed.getItems()) {
             if (postId == null) {
 //                if (item.getCode().equals(mediaId)) {
-                if(true){
+                if (true) {
                     postId = item.getPk();
                 }
             }
@@ -178,7 +181,7 @@ public class AuthServiceImpl implements Auth {
         return userResult;
     }
 
-    private  static Instagram4j loginProxy(String userName, String password){
+    private static Instagram4j loginProxy(String userName, String password) {
         Instagram4j instagram = Instagram4j.builder().username(userName).password(password).build();
         instagram.setup();
         HttpHost proxy = new HttpHost("IP_SERVER", 8080, "http");
@@ -196,14 +199,14 @@ public class AuthServiceImpl implements Auth {
         return instagram;
     }
 
-    private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException,ClassNotFoundException {
+    private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException, ClassNotFoundException {
         Instagram4j instagram = Instagram4j.builder().username(userName).password(password).build();
         //
 
         PersistentCookieStore persistentCookieStore = new PersistentCookieStore();
         try {
-            if(persistentCookieStore.getProxyValidnes()){
-                return new Instagram4j("","");
+            if (persistentCookieStore.getProxyValidnes()) {
+                return new Instagram4j("", "");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -261,11 +264,18 @@ public class AuthServiceImpl implements Auth {
             if (userResult.getUser().public_phone_number != null) {
                 userData.setPhoneNumber(userResult.getUser().public_phone_number);
             }
-        }else {
-            //When user is over abussed with too many requests
-            userData.setUserName("Unavailable");
         }
-        return userData;
+        return validationOfUser(userData, userResult);
+    }
+
+    private static UserData validationOfUser(UserData userDataPredefined, InstagramSearchUsernameResult userResult){
+        if (USER_NOT_FOUND.equals( userResult.getMessage())) {
+            //When user is banned and not reached for some reason
+            userDataPredefined.setUserName("Unavailable");
+        }if(LOGIN_REQUIRED.equals(userResult.getMessage())){
+            userDataPredefined.setUserName("Add delay");
+        }
+        return userDataPredefined;
     }
 
     /*
