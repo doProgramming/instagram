@@ -12,7 +12,7 @@ public class ScraperEndpoint {
     ScraperService scraperService;
 
     @GetMapping(value = "/instagram/user/data/withproxy")
-    public UserData getDataFromInstagram(@RequestParam String username, @RequestParam String password
+    public Comment getDataFromInstagram(@RequestParam String username, @RequestParam String password
             , @RequestParam String comment, @RequestParam String getDataFromUser, @RequestParam String mediaId) throws IOException,ClassNotFoundException {
         return scraperService.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId);
     }
@@ -34,7 +34,7 @@ public class ScraperEndpoint {
     }
 
     @GetMapping(value = "/instagram/sendComment")
-    public UserData sendComment(@RequestParam String username, @RequestParam String password
+    public Comment sendComment(@RequestParam String username, @RequestParam String password
             , @RequestParam String comment, @RequestParam String getDataFromUser,@RequestParam String mediaId) throws IOException,ClassNotFoundException {
         return scraperService.getDataAndSendComment(username, comment, password, getDataFromUser, mediaId);
     }

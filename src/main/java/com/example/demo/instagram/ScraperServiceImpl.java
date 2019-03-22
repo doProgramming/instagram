@@ -30,9 +30,9 @@ public class ScraperServiceImpl implements ScraperService {
 
 
     @Override
-    public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException, ClassNotFoundException {
+    public Comment getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException, ClassNotFoundException {
 
-        UserData userData = new UserData();
+        Comment commentObj = new Comment();
         //Removes prefix and allows to be used with username and as link
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
 
@@ -42,13 +42,17 @@ public class ScraperServiceImpl implements ScraperService {
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
         Instagram4j instagram = loginProxyAndCookie(usernameLogin, password);
-        //TODO enalbe send comment and fix it
+
         InstagramPostCommentResult resultFromComment = sendComment(instagram, userResult, comment, mediaIdWithoutSufix);
-        if(STATUS_FAIL.equals(resultFromComment.getStatus())){
-            userData.setUserName(NOT_AUTHORIZED_TO_VIEW_USER);
-            return userData;
+        if(resultFromComment!= null && resultFromComment.getComment() != null && "Active".equals(resultFromComment.getComment().getStatus())){
+            commentObj.setText(resultFromComment.getComment().getText());
+            commentObj.setIsSent(true);
         }
-        return mapFromInstagramToUserData(userResult);
+        if(STATUS_FAIL.equals(resultFromComment.getStatus())){
+            commentObj.setMessage(NOT_AUTHORIZED_TO_VIEW_USER);
+            return commentObj;
+        }
+        return commentObj;
     }
 
     @Override
@@ -270,6 +274,7 @@ public class ScraperServiceImpl implements ScraperService {
      * */
 
     private InstagramPostCommentResult sendComment(Instagram4j instagram, InstagramSearchUsernameResult usernameResult, String comment, String mediaId) throws IOException {
+        Boolean isCommentSent = false;
         usernameResult.getUser().getPk();
         InstagramFeedResult tagFeed = instagram.sendRequest(new InstagramUserFeedRequest(usernameResult.getUser().getPk()));
         Long postId = null;
