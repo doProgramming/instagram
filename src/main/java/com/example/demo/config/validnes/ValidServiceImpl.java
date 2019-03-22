@@ -1,6 +1,5 @@
-package com.example.demo.jInstagram;
+package com.example.demo.config.validnes;
 
-import com.example.demo.instagram.ProxyValid;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -11,10 +10,10 @@ import java.net.URI;
 import java.util.List;
 
 @Service
-public class PersistentCookieStore implements CookieStore, Runnable, ProxyValid {
+public class ValidServiceImpl implements CookieStore, Runnable, ValidService {
     private CookieStore store;
 
-    public PersistentCookieStore() {
+    public ValidServiceImpl() {
         store = new CookieManager().getCookieStore();
         // deserialize cookies into store
         Runtime.getRuntime().addShutdownHook(new Thread(this));

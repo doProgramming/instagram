@@ -1,6 +1,6 @@
 package com.example.demo.instagram;
 
-import com.example.demo.jInstagram.PersistentCookieStore;
+import com.example.demo.config.validnes.ValidServiceImpl;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -21,28 +21,33 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 
 @Service
-public class AuthServiceImpl implements Auth {
+public class ScraperServiceImpl implements ScraperService {
 
     private static final String USER_NOT_FOUND = "User not found";
     private static final String LOGIN_REQUIRED = "login_required";
+    private static final String NOT_AUTHORIZED_TO_VIEW_USER = "Not authorized to view user";
+    private static final String STATUS_FAIL = "fail";
 
 
     @Override
     public UserData getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException, ClassNotFoundException {
 
-        //Connect to instagram account host with proxy
-        //Instagram4j instagram = login(usernameLogin, password,coockiName, coockiValue);
-
+        UserData userData = new UserData();
         //Removes prefix and allows to be used with username and as link
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
 
+        String mediaIdWithoutPrefix = mediaId.replaceFirst("https://www.instagram.com/p/", "");
+        String mediaIdWithoutSufix = removeLastSign(mediaIdWithoutPrefix);
         //Get data from user
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
-        //Setup of useragent
-        String useragent = "Samsung Galaxy 9";
+        Instagram4j instagram = loginProxyAndCookie(usernameLogin, password);
         //TODO enalbe send comment and fix it
-        //sendComment(instagram, userResult, comment, mediaId);
+        InstagramPostCommentResult resultFromComment = sendComment(instagram, userResult, comment, mediaIdWithoutSufix);
+        if(STATUS_FAIL.equals(resultFromComment.getStatus())){
+            userData.setUserName(NOT_AUTHORIZED_TO_VIEW_USER);
+            return userData;
+        }
         return mapFromInstagramToUserData(userResult);
     }
 
@@ -56,8 +61,7 @@ public class AuthServiceImpl implements Auth {
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
         //Map and validate user
-        UserData userDataResponse = mapFromInstagramToUserData(userResult);
-        return userDataResponse;
+        return mapFromInstagramToUserData(userResult);
     }
 
     /*
@@ -67,20 +71,6 @@ public class AuthServiceImpl implements Auth {
      *
      *
      * */
-
-    @Override
-    public UserData oldlogin(String username, String password, String getDataFromUser) throws IOException {
-        Instagram4j instagram = Instagram4j.builder().username(username).password(password).build();
-        instagram.setup();
-        instagram.login();
-
-        //Removes prefix and allows to be used with username and as link
-        String usernameWithoutPrefix = getDataFromUser.replaceFirst("https://instagram.com/", "");
-
-        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameWithoutPrefix));
-
-        return mapFromInstagramToUserData(userResult);
-    }
 
     @Override
     public String sendComment(Authentication authentication, String coockiName, String coockiValue) throws IOException, ClassNotFoundException {
@@ -121,9 +111,9 @@ public class AuthServiceImpl implements Auth {
         ((BasicClientCookie) coockie).setAttribute("coockies", "nice");
         cookieStore.addCookie(coockie);
         Instagram4j instagram = Instagram4j.builder().username(username).password(password).cookieStore(cookieStore).userId(11648766879L).uuid("7b26602d-3722-49ee-bb6a-ba2d803ae64a").build();
-        PersistentCookieStore persistentCookieStore = new PersistentCookieStore();
+        ValidServiceImpl validServiceImpl = new ValidServiceImpl();
         try {
-            if (persistentCookieStore.getProxyValidnes()) {
+            if (validServiceImpl.getProxyValidnes()) {
                 return new Instagram4j("", "");
             }
         } catch (IOException e) {
@@ -201,20 +191,9 @@ public class AuthServiceImpl implements Auth {
 
     private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException, ClassNotFoundException {
         Instagram4j instagram = Instagram4j.builder().username(userName).password(password).build();
-        //
-
-        PersistentCookieStore persistentCookieStore = new PersistentCookieStore();
-        try {
-            if (persistentCookieStore.getProxyValidnes()) {
-                return new Instagram4j("", "");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         instagram.setup();
         instagram.login();
-        //rankToken got pupulated
+
         File cookieLogin = new File(userName + ".txt");
 
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cookieLogin));
@@ -239,6 +218,7 @@ public class AuthServiceImpl implements Auth {
      *
      *
      *    Map data from API to my wrapper class and send to user as response
+     *    also call the validation
      *
      *
      * */
@@ -268,12 +248,15 @@ public class AuthServiceImpl implements Auth {
         return validationOfUser(userData, userResult);
     }
 
+    //Valid if the user is Unavailable or if account is abused
     private static UserData validationOfUser(UserData userDataPredefined, InstagramSearchUsernameResult userResult){
         if (USER_NOT_FOUND.equals( userResult.getMessage())) {
             //When user is banned and not reached for some reason
             userDataPredefined.setUserName("Unavailable");
         }if(LOGIN_REQUIRED.equals(userResult.getMessage())){
             userDataPredefined.setUserName("Add delay");
+        }if(NOT_AUTHORIZED_TO_VIEW_USER.equals(userResult.getMessage())){
+            userDataPredefined.setUserName("Not authorized");
         }
         return userDataPredefined;
     }
@@ -290,25 +273,43 @@ public class AuthServiceImpl implements Auth {
         usernameResult.getUser().getPk();
         InstagramFeedResult tagFeed = instagram.sendRequest(new InstagramUserFeedRequest(usernameResult.getUser().getPk()));
         Long postId = null;
-        for (InstagramFeedItem item : tagFeed.getItems()) {
-            if (postId == null) {
-                if (item.getCode().equals(mediaId)) {
-                    postId = item.getPk();
+        if(NOT_AUTHORIZED_TO_VIEW_USER.equals(tagFeed.getMessage())){
+            postId = 99999L;
+        }else {
+            for (InstagramFeedItem item : tagFeed.getItems()) {
+                if (postId == null) {
+                    if (item.getCode().equals(mediaId)) {
+                        postId = item.getPk();
+                    }
                 }
             }
         }
-//                tagFeed.getItems().get(0).getPk();
-
-        //Check is this getUser.getPk() I need id of user
-        //InstagramFeedResult feedResult = instagram.sendRequest(new InstagramUserFeedRequest(postId));
 
         InstagramPostCommentResult results = instagram.sendRequest(new InstagramPostCommentRequest(postId, comment));
         return results;
     }
 
-//    getFeedFromHashTag
-//    InstagramFeedResult tagFeed = instagram.sendRequest(new InstagramTagFeedRequest("github"));
-//    for (InstagramFeedItem feedResult : tagFeed.getItems()) {
-//        System.out.println("Post ID: " + feedResult.getPk());
-//    }
+
+    @Override
+    public UserData oldlogin(String username, String password, String getDataFromUser) throws IOException {
+        Instagram4j instagram = Instagram4j.builder().username(username).password(password).build();
+        instagram.setup();
+        instagram.login();
+
+        //Removes prefix and allows to be used with username and as link
+        String usernameWithoutPrefix = getDataFromUser.replaceFirst("https://instagram.com/", "");
+
+        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(usernameWithoutPrefix));
+
+        return mapFromInstagramToUserData(userResult);
+    }
+
+    //Remove '/' from url
+    private String removeLastSign(String url) {
+        if (url != null && url.length() > 0 && url.charAt(url.length() - 1) == '/') {
+            url = url.substring(0, url.length() - 1);
+        }
+        return url;
+    }
+
 }
