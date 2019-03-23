@@ -30,7 +30,7 @@ public class ScraperServiceImpl implements ScraperService {
 
 
     @Override
-    public Comment getDataAndSendComment(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException, ClassNotFoundException {
+    public Comment sendCommentGiveResponse(String usernameLogin, String comment, String password, String userFrom, String mediaId) throws IOException, ClassNotFoundException {
 
         Comment commentObj = new Comment();
         //Removes prefix and allows to be used with username and as link
@@ -39,9 +39,13 @@ public class ScraperServiceImpl implements ScraperService {
         String mediaIdWithoutPrefix = mediaId.replaceFirst("https://www.instagram.com/p/", "");
         String mediaIdWithoutSufix = removeLastSign(mediaIdWithoutPrefix);
         //Get data from user
-        InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
         Instagram4j instagram = loginProxyAndCookie(usernameLogin, password);
+//        Instagram4j instagram = login(usernameHost, password, coockiName, coockiValue);
+        InstagramSearchUsernameResult userResult = instagram.sendRequest(new InstagramSearchUsernameRequest(userFrom));
+        //InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
+
+       // Instagram4j instagram = loginProxyAndCookie(usernameLogin, password);
 
         InstagramPostCommentResult resultFromComment = sendComment(instagram, userResult, comment, mediaIdWithoutSufix);
         if(resultFromComment!= null && resultFromComment.getComment() != null && "Active".equals(resultFromComment.getComment().getStatus())){
