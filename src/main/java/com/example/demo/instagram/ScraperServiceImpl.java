@@ -67,6 +67,24 @@ public class ScraperServiceImpl implements ScraperService {
 
         //Get data from user
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
+        if(userResult != null && userResult.getStatus() != null){
+            for(int i=0; i<=1000; i++){
+                userResult.getStatus();
+            }
+        }
+
+        //Map and validate user
+        return mapFromInstagramToUserData(userResult);
+    }
+
+    @Override
+    public UserData getDataNoProxy(String usernameLogin, String password, String userFrom) throws IOException, ClassNotFoundException {
+
+        //Removes prefix and allows to be used with username and as link
+        String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
+
+        //Get data from user
+        InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
 
         //Map and validate user
         return mapFromInstagramToUserData(userResult);

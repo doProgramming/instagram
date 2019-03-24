@@ -17,6 +17,12 @@ public class ScraperEndpoint {
 //        return scraperService.sendCommentGiveResponse(username, comment, password, getDataFromUser, mediaId);
 //    }
 
+    @GetMapping(value = "/instagram/getdata/noproxy")
+    public UserData getDataNoProxy(@RequestParam String username, @RequestParam String password
+            ,  @RequestParam String getDataFromUser) throws IOException,ClassNotFoundException {
+        return scraperService.getDataNoProxy(username, password, getDataFromUser);
+    }
+
     @GetMapping(value = "/instagram/getdata")
     public UserData getData(@RequestParam String username, @RequestParam String password
             ,  @RequestParam String getDataFromUser) throws IOException,ClassNotFoundException {
