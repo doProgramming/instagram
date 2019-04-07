@@ -8,7 +8,7 @@ import java.util.Properties;
 public class EmailServer {
 
     public void sendMail(String subject, String body, String receiverName, String senderName, String sendEmailTo) {
-        final String username = "petrovicstrahinjabgsrb@gmail.com";
+        final String username = "javadeveloper889@gmail.com";
         final String password = "123456sp*";
 
         Properties prop = new Properties();
@@ -32,7 +32,7 @@ public class EmailServer {
         try {
 
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("petrovicstrahinjabgsrb@gmail.com"));
+            message.setFrom(new InternetAddress("javadeveloper889@gmail.com"));
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(sendEmailTo));
             message.setSubject(subject);
