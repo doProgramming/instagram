@@ -29,6 +29,7 @@ public class LikesServiceImpl implements LikesService {
         InstagramFeedResult tagFeed = null;
         String validation = null;
         if (usernames == null || usernames.isEmpty()) {
+            usernames = new ArrayList<>();
             usernames.add(username);
         }
         for (String usernameFromList : usernames) {
