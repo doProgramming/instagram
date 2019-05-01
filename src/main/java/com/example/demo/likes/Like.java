@@ -9,9 +9,10 @@ import java.util.List;
 @Setter
 public class Like {
 
+    private Long id;
     private int followersCount;
     private int followingCount;
-    private List<Integer> allFollowers;
+    private int allFollowers;
     private String user;
     private int mediaId;
     private int mediaCount;

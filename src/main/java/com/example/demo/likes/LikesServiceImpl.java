@@ -10,6 +10,7 @@ import org.brunocvcunha.instagram4j.requests.InstagramUserFeedRequest;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedItem;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramSearchUsernameResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -18,6 +19,11 @@ import java.util.List;
 
 @Service
 public class LikesServiceImpl implements LikesService {
+
+    @Autowired LikeMapper likeMapper;
+
+    @Autowired
+    LikeRepository likeRepository;
 
     @Override
     public List<Like> sendLike(String username, String password, String getDataFromUser, List<String> usernames) throws IOException, ClassNotFoundException {
@@ -110,6 +116,7 @@ public class LikesServiceImpl implements LikesService {
         InstagramFeedResult tagFeed = null;
 
         if (usernames == null || usernames.isEmpty()) {
+            usernames = new ArrayList<>();
             usernames.add(username);
         }
         for (String usernameFromList : usernames) {
@@ -130,9 +137,24 @@ public class LikesServiceImpl implements LikesService {
         for (InstagramFeedItem item : tagFeed.getItems()) {
             instagram.sendRequest(new InstagramLikeRequest(item.getPk()));
         }
+        //Here it saves Like in database
+        addLike(like);
+        //Here we add to the list, but for now it is only one record
         likes.add(like);}
 
         return likes;
+    }
+
+    //CRUD
+    @Override
+    public Like addLike(Like like) {
+        LikeEntity likeEntity = likeMapper.mapToEntity(like);
+        likeRepository.save(likeEntity);
+        Like likeModel = likeMapper.mapToModel(likeEntity);
+        likeEntity = likeRepository.getOne(likeModel.getId());
+        likeModel = likeMapper.mapToModel(likeEntity);
+        System.out.println("saved user");
+        return likeModel;
     }
 
     private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException, ClassNotFoundException {

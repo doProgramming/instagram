@@ -1,13 +1,23 @@
 package com.example.demo.email;
 
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class EmailServiceImpl implements EmailService {
 
-    @Override
-    public Boolean sendEmail(String subject, String body, String receiverName, String senderName, String sendEmailTo) {
-        new EmailServer().sendMail(subject, body, receiverName, senderName, sendEmailTo);
-        return true;
+    @Autowired
+    public JavaMailSender emailSender;
+
+    public void sendSimpleMessage(
+            String to, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
+        emailSender.send(message);
+
     }
 }

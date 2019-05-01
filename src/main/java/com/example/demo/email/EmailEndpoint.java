@@ -14,7 +14,7 @@ public class EmailEndpoint {
     EmailService emailService;
 
     @GetMapping
-    public void sendEmail(@RequestParam String subject, @RequestParam String body, @RequestParam(required = false) String receiverName, @RequestParam String senderName, @RequestParam String sendEmailTo) {
-        emailService.sendEmail(subject, body, receiverName, senderName, sendEmailTo);
+    public void sendEmail(@RequestParam String to, @RequestParam String subject, @RequestParam String text) {
+        emailService.sendSimpleMessage(to, subject, text);
     }
 }

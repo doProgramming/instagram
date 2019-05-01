@@ -28,10 +28,10 @@ public class BotServiceImpl implements BotService {
             image = imageMapper.mapToModel(entity);
             if (image != null && image.getUrlLink() != null) {
                 url = image.getUrlLink();
-                emailService.sendEmail(
-                        "Subject",
+                emailService.sendSimpleMessage(
+                        "petrovicstrahinja@yahoo.com",
                         "Hello, we are company from Lisabon and we would like to...",
-                        "Dear Roberto", "Toptal enginnering", url);
+                        "Dear Roberto");
             }
         }
     }

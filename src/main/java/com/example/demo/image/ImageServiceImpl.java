@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
+import java.util.List;
 
 @Service
 public class ImageServiceImpl implements ImageService {
@@ -24,6 +25,12 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public InstagramConfigurePhotoResult uploadImage(String username, String password, String imageUrl, String title) throws IOException, ClassNotFoundException {
         InstagramConfigurePhotoResult userResult = justGetUserData(username, password, imageUrl, title);
+        return userResult;
+    }
+
+    @Override
+    public InstagramConfigurePhotoResult uploadImages(String username, String password, List<String> imageUrls, String title) throws IOException, ClassNotFoundException {
+        InstagramConfigurePhotoResult userResult = uploadAllImages(username, password, imageUrls, title);
         return userResult;
     }
 
@@ -44,6 +51,20 @@ public class ImageServiceImpl implements ImageService {
         ImageIO.write(img, "jpg", file);
         InstagramConfigurePhotoResult userResult =instagram.sendRequest(new InstagramUploadPhotoRequest(new File("C:/Cmder/instagram/downloaded.jpg"), title));
         return userResult;
+    }
+
+    private InstagramConfigurePhotoResult uploadAllImages(String usernameHost, String password, List<String> imageUrls, String title) throws IOException, ClassNotFoundException {
+        Instagram4j instagram = loginProxyAndCookie(usernameHost, password);
+        InstagramConfigurePhotoResult userResult = null;
+        for(String imageUrl : imageUrls){
+            try {
+                URL url = new URL(imageUrl);
+                BufferedImage img = ImageIO.read(url);
+                File file = new File("downloaded.jpg");
+                ImageIO.write(img, "jpg", file);
+                userResult =instagram.sendRequest(new InstagramUploadPhotoRequest(new File("C:/Cmder/instagram/downloaded.jpg"), title));
+            }catch (Exception e){}
+        }return userResult;
     }
 
     private Instagram4j loginProxyAndCookie(String userName, String password) throws IOException, ClassNotFoundException {
