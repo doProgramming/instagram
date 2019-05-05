@@ -22,6 +22,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(username);
         user.setPassword(password);
         user.setEmail(email);
+        user.setBanned(false);
         users.add(user);
         return addAllUsers(users);
     }
