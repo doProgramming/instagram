@@ -19,7 +19,7 @@ public class UserEntity {
     private String password;
     private String username;
     private String email;
-    @Column(columnDefinition = "TINYINT")
+    @Column(columnDefinition = "TINYINT", nullable = false)
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean banned;
 }

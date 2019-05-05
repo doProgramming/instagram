@@ -40,6 +40,7 @@ public class UserServiceImpl implements UserService {
             user.setUsername(oneUser.getUsername());
             user.setPassword(oneUser.getPassword());
             user.setEmail(oneUser.getEmail());
+            user.setBanned(oneUser.getBanned());
             userRepository.save(user);
             if (user != null) {
                 if (users.size() == 1 && user.getId() == null) {
