@@ -1,6 +1,7 @@
 package com.example.demo.instagram;
 
 import com.example.demo.config.validnes.ValidServiceImpl;
+import com.example.demo.users.UserService;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -16,6 +17,7 @@ import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedItem;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramPostCommentResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramSearchUsernameResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -27,6 +29,9 @@ public class ScraperServiceImpl implements ScraperService {
     private static final String LOGIN_REQUIRED = "login_required";
     private static final String NOT_AUTHORIZED_TO_VIEW_USER = "Not authorized to view user";
     private static final String STATUS_FAIL = "fail";
+
+    @Autowired
+    UserService userService;
 
 
     @Override
@@ -82,6 +87,9 @@ public class ScraperServiceImpl implements ScraperService {
 
         //Removes prefix and allows to be used with username and as link
         String usernameWithoutPrefix = userFrom.replaceFirst("https://instagram.com/", "");
+
+        //Add user to database(Save it)
+        userService.addUser(usernameLogin, password,"didnt save");
 
         //Get data from user
         InstagramSearchUsernameResult userResult = justGetUserData(usernameLogin, password, usernameWithoutPrefix);
