@@ -22,9 +22,11 @@ public class LoginSessionServiceImpl implements LoginSessionService {
     @Override
     public boolean login(String username, String password) throws IOException, ClassNotFoundException {
 
-        Instagram4j instagram = null;
+        Instagram4j instagram;
         CookieStore cookieStore = null;
         String uuid = "";
+        boolean newSession = false;
+        boolean oldSession = false;
 
         File[] directorySession = new File("user_session").listFiles();
         File [] directoryUUID = new File("user_uuid").listFiles();
@@ -40,6 +42,7 @@ public class LoginSessionServiceImpl implements LoginSessionService {
         }for(File uuidFile : directoryUUID){
             LOG.info("Checking if there is already UUID file for current user: " + username);
             if (uuidFile.getName().contains(username) && uuid.isEmpty()){
+                LOG.info("Yes, we have used this user before and we have random UUID saved");
                 Scanner inFile = new Scanner(new FileReader(uuidFile));
                 uuid = inFile.next();
             }
@@ -53,6 +56,8 @@ public class LoginSessionServiceImpl implements LoginSessionService {
                     .build();
 
             instagram.setup();
+            instagram.login();
+            oldSession = true;
         }else {
             LOG.info("Loging without session with username and password only");
             instagram = Instagram4j.builder()
@@ -61,10 +66,15 @@ public class LoginSessionServiceImpl implements LoginSessionService {
                     .build();
 
             instagram.setup();
+            instagram.login();
+            newSession = true;
         }
         boolean isLoggedin = false;
         if (instagram != null && instagram.getRankToken() != null) {
-            LOG.info("Session is valid and we didn't need to login with new session");
+            if(oldSession){
+                LOG.info("Successfully user has logged in. Session is valid and we didn't need to login with new session");
+            }else if(newSession)
+            LOG.info("Successfully user has logged in. Session is new and we created new session");
         }else {
             LOG.info("Session is expired or we are not able to login with this user " + username);
             for (File expiredCookieFile : directorySession){
@@ -80,6 +90,8 @@ public class LoginSessionServiceImpl implements LoginSessionService {
                      .build();
 
             instagram.setup();
+            instagram.login();
+            newSession = true;
 
             try {
                 if(instagram!= null && instagram.getRankToken() != null){
@@ -90,21 +102,21 @@ public class LoginSessionServiceImpl implements LoginSessionService {
             }catch (Exception e){
                 LOG.error("Failed to login for username " + username );
             }
-            isLoggedin = instagram.getRankToken() != null ? true : false;
-            if(isLoggedin){
-                LOG.info("Creating cookie file with session for user " + username);
-                File currentUserSessionFile = new File("user_session\\" + username + ".txt");
-                ObjectOutputStream sessionStream = new ObjectOutputStream(new FileOutputStream(currentUserSessionFile));
-                sessionStream.writeObject(instagram.getCookieStore());
-                sessionStream.flush();
-                sessionStream.close();
-                LOG.info("Creating uuid file with for user " + username);
-                File currentUserUUIDFile = new File("user_uuid\\" + username + ".txt");
-                ObjectOutputStream uuidStream = new ObjectOutputStream(new FileOutputStream(currentUserUUIDFile));
-                uuidStream.writeObject(instagram.getUuid());
-                uuidStream.flush();
-                uuidStream.close();
-            }
+        }
+        isLoggedin = instagram.getRankToken() != null ? true : false;
+        if(isLoggedin && newSession){
+            LOG.info("Creating cookie file with session for user " + username);
+            File currentUserSessionFile = new File("user_session\\" + username + ".txt");
+            ObjectOutputStream sessionStream = new ObjectOutputStream(new FileOutputStream(currentUserSessionFile));
+            sessionStream.writeObject(instagram.getCookieStore());
+            sessionStream.flush();
+            sessionStream.close();
+            LOG.info("Creating uuid file with for user " + username);
+            File currentUserUUIDFile = new File("user_uuid\\" + username + ".txt");
+            ObjectOutputStream uuidStream = new ObjectOutputStream(new FileOutputStream(currentUserUUIDFile));
+            uuidStream.writeObject(instagram.getUuid());
+            uuidStream.flush();
+            uuidStream.close();
         }
         InstagramGetMediaLikersResult tagFeed = instagram.sendRequest(new InstagramGetMediaLikersRequest(1020304050L));
 
