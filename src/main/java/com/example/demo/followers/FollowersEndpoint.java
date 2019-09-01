@@ -24,4 +24,9 @@ public class FollowersEndpoint {
 //        return followersService.unfollow(username, password, getDataFromUser);
 //    }
 
+    @RequestMapping(value = "/instagram/getMedia")
+    public Follower proxyGetMediaTry() throws IOException, ClassNotFoundException {
+        return followersService.proxyTry();
+    }
+
 }

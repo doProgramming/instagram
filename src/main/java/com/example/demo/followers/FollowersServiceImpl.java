@@ -3,12 +3,11 @@ package com.example.demo.followers;
 import com.example.demo.config.validnes.ValidServiceImpl;
 import org.apache.http.client.CookieStore;
 import org.brunocvcunha.instagram4j.Instagram4j;
-import org.brunocvcunha.instagram4j.requests.InstagramFollowRequest;
-import org.brunocvcunha.instagram4j.requests.InstagramSearchUsernameRequest;
-import org.brunocvcunha.instagram4j.requests.InstagramUnfollowRequest;
-import org.brunocvcunha.instagram4j.requests.InstagramUserFeedRequest;
+import org.brunocvcunha.instagram4j.requests.*;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramFeedResult;
+import org.brunocvcunha.instagram4j.requests.payload.InstagramGetMediaLikersResult;
 import org.brunocvcunha.instagram4j.requests.payload.InstagramSearchUsernameResult;
+import org.bytedeco.javacpp.presets.opencv_core;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -17,6 +16,9 @@ import java.util.List;
 
 @Component
 public class FollowersServiceImpl implements FollowersService {
+
+    private final static String USERNAME = "petar6342";
+    private final static String PASSWORD = "123456sp";
 
     @Override
     public Follower follow(String username, String password, String getDataFromUser) throws IOException {
@@ -124,5 +126,33 @@ public class FollowersServiceImpl implements FollowersService {
             e.printStackTrace();
         }
         return follower;
+    }
+
+    @Override
+    public Follower proxyTry() throws IOException, ClassNotFoundException {
+
+        Instagram4j instagram = Instagram4j.builder().username(USERNAME).password(PASSWORD).build();
+        instagram.setup();
+        instagram.login();
+
+        File cookiesFile = new File("user_session\\" + USERNAME + ".txt");
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cookiesFile));
+        oos.writeObject(instagram.getCookieStore());
+        oos.close();
+
+
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cookiesFile));
+        CookieStore cookieStore = (CookieStore) ois.readObject();
+        ois.close();
+
+        Instagram4j instagram2 = Instagram4j.builder().username(USERNAME)
+                .password(PASSWORD)
+                .uuid(instagram.getUuid())
+                .cookieStore(cookieStore)
+                .build();
+        instagram2.setup();
+
+        InstagramGetMediaLikersResult tagFeed = instagram2.sendRequest(new InstagramGetMediaLikersRequest(1020304050L));
+        return null;
     }
 }
