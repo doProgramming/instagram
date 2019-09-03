@@ -20,7 +20,7 @@ public class LoginSessionServiceImpl implements LoginSessionService {
     //Da bi se ulogovao moram imati Sesiju to je 7 nekih kukija i moram imati isti UUID, to je valjda random id koji treba biti isti
     // brunocvcunha commented on Oct 12, 2017 , https://github.com/brunocvcunha/instagram4j/issues/71
     @Override
-    public boolean login(String username, String password) throws IOException, ClassNotFoundException {
+    public Instagram4j login(String username, String password) throws IOException, ClassNotFoundException {
 
         Instagram4j instagram;
         CookieStore cookieStore = null;
@@ -118,8 +118,8 @@ public class LoginSessionServiceImpl implements LoginSessionService {
             uuidStream.flush();
             uuidStream.close();
         }
-        InstagramGetMediaLikersResult tagFeed = instagram.sendRequest(new InstagramGetMediaLikersRequest(1020304050L));
+        //InstagramGetMediaLikersResult tagFeed = instagram.sendRequest(new InstagramGetMediaLikersRequest(1020304050L));
 
-        return isLoggedin;
+        return instagram;
     }
 }

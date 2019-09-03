@@ -1,9 +1,9 @@
 package com.example.demo.Login;
 
-import java.io.FileNotFoundException;
+import org.brunocvcunha.instagram4j.Instagram4j;
 import java.io.IOException;
 
 public interface LoginSessionService {
 
-    boolean login(String username, String password) throws IOException, ClassNotFoundException;
+    Instagram4j login(String username, String password) throws IOException, ClassNotFoundException;
 }

@@ -19,7 +19,7 @@ public class ImageEndpoint {
     }
     @PostMapping(value = "/instagram/postImages")
     public InstagramConfigurePhotoResult setImage(@RequestParam String username, @RequestParam String password, @RequestBody List<String> urlImages, @RequestParam String title) throws IOException, ClassNotFoundException {
-        return imageService. uploadImages(username, password, urlImages, title);
+        return imageService.uploadImages(username, password, urlImages, title);
     }
     @PostMapping(value = "/instagram/save")
     public Image saveImage(@RequestBody Image image){
